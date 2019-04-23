@@ -2,10 +2,11 @@ from django.db import models
 from django.contrib.auth.models import User
 from django.dispatch import receiver
 from django.db.models.signals import post_save
+from django.conf import settings
 
-class Profile(models.Model):
+class Profile(models.Model):   
     user = models.OneToOneField(User, on_delete=models.CASCADE)
-    customer = models.BooleanField(default=False)
+    customer = models.BooleanField(verbose_name='Заказчик', default=False)
 
     class Meta:
         verbose_name = 'Профиль пользователя'
@@ -23,7 +24,7 @@ def save_user_profile(sender, instance, **kwargs):
 
 
 class TaskState(models.Model):
-    title = models.CharField(max_length=100)
+    title = models.CharField(verbose_name='Наименование', max_length=100)
 
     class Meta:
         verbose_name = 'Статус задачи'
@@ -31,7 +32,7 @@ class TaskState(models.Model):
 
 
 class TaskType(models.Model):
-    title = models.CharField(max_length=100)
+    title = models.CharField(verbose_name='Наименование', max_length=100)
     
     class Meta:
         verbose_name = 'Тип задачи'
@@ -39,12 +40,13 @@ class TaskType(models.Model):
 
 
 class Task(models.Model):
-    title = models.CharField(max_length=150)
-    date = models.DateTimeField(auto_now_add=True)
-    description = models.TextField(max_length=500)
+    title = models.CharField(verbose_name='Наименование', max_length=150)
+    date = models.DateTimeField(verbose_name='Дата', auto_now_add=True)
+    description = models.TextField(verbose_name='Описание', max_length=500)
     state = models.ForeignKey(TaskState, on_delete=models.PROTECT)
     task_type = models.ForeignKey(TaskType, on_delete=models.PROTECT)
-    performers = models.ManyToManyField(User)
+    author = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='user_task_auth')
+    performers = models.ManyToManyField(User, related_name='user_task_performers')
 
     class Meta:
         ordering = ['date', 'title']
@@ -52,10 +54,11 @@ class Task(models.Model):
         verbose_name_plural = 'Задачи'
 
 
-class Comment(models.Model):
-    date = models.DateTimeField(auto_now=True)
-    description = models.TextField(max_length=500)
+class Comment(models.Model):    
+    date = models.DateTimeField(verbose_name="Дата", auto_now=True)
+    description = models.TextField(verbose_name="Содержание", max_length=500)
     task = models.ForeignKey(Task, on_delete=models.PROTECT)
+    author = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     
     class Meta:
         ordering = ['date']
