@@ -13,14 +13,15 @@
   <body>
     
     <div class="container">
-        <h1>Задачи</h1>
+        <h1>Типы задач</h1>
         <ul>
-            {% for task in object_list %}
-                <li>{{ task.title }}</li>
+            {% for tasktype in object_list %}
+                <li><a href="{{ request.path }}{{tasktype.id}}" >{{ tasktype.title }}</a> </li>
             {% empty %}
-                <li>No tasks yet.</li>
+                <li>No task type yet.</li>
             {% endfor %}
         </ul>
+        <a href="{% url 'task_type_add' %}">Добавить</a>
     </div>
 
     <!-- Optional JavaScript -->

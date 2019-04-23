@@ -9,16 +9,26 @@ class TasksView(ListView):
     template_name = 'tasks_list.html'
 
 
+class TaskTypesView(ListView):
+    model = TaskType
+    template_name = 'task_types/task_types_list.html'
+
+
 class TaskTypeCreate(CreateView):
     model = TaskType
     fields = ['title']
+    template_name = 'task_types/task_type_create_form.html'
+    success_url = reverse_lazy('task_types_list')
 
 
 class TaskTypeUpdate(UpdateView):
     model = TaskType
     fields = ['title']
+    template_name = 'task_types/task_type_update_form.html'
+    success_url = reverse_lazy('task_types_list')
 
 
 class TaskTypeDelete(DeleteView):
     model = TaskType
-    success_url = reverse_lazy('task_type_list')
+    success_url = reverse_lazy('task_types_list')
+    template_name = 'task_types/task_type_delete_confirm_form.html'
