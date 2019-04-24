@@ -9,6 +9,27 @@ class TasksView(ListView):
     template_name = 'tasks_list.html'
 
 
+class TaskCreate(CreateView):
+    model = Task
+    fields = ['title', 'task_type', 'description']
+    template_name = 'simple_obj/simple_obj_create_form.html'
+    success_url = reverse_lazy('task_list')
+
+
+class TaskUpdate(UpdateView):
+    model = Task
+    fields = ['title', 'task_type', 'description']
+    template_name = 'simple_obj/simple_obj_update_form.html'
+    success_url = reverse_lazy('task_list')
+
+
+class TaskDelete(DeleteView):
+    model = Task
+    success_url = reverse_lazy('task_list')
+    template_name = 'simple_obj/simple_obj_delete_confirm_form.html'
+
+
+
 class TaskTypesView(ListView):
     model = TaskType
     template_name = 'simple_obj/simple_obj_list.html'
