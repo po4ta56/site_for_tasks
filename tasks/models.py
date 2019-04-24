@@ -5,6 +5,15 @@ from django.db.models.signals import post_save
 from django.conf import settings
 
 
+class ModelsNameMixin:
+    def get_model_name(self):
+        return self._meta.verbose_name
+
+    def get_model_name_plural(self):
+        return self._meta.verbose_name_plural
+
+
+
 class Profile(models.Model):   
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     customer = models.BooleanField(verbose_name='Заказчик', default=False)
@@ -24,7 +33,7 @@ def save_user_profile(sender, instance, **kwargs):
     instance.profile.save()
 
 
-class TaskState(models.Model):
+class TaskState(models.Model, ModelsNameMixin):
     title = models.CharField(verbose_name='Наименование', max_length=100, unique=True)
 
     def __str__(self):      
@@ -35,18 +44,29 @@ class TaskState(models.Model):
         verbose_name_plural = 'Статусы задачи'
 
 
-class TaskType(models.Model):
+class TaskType(models.Model, ModelsNameMixin):
     title = models.CharField(verbose_name='Наименование', max_length=100, unique=True)
     
     def __str__(self):      
         return "{{ {0} : {1} }}".format(self._meta.verbose_name, self.title)
-
+    
     class Meta:
         verbose_name = 'Тип задачи'
         verbose_name_plural = 'Типы задачи'
+    
+
+class TaskQuerySet(models.QuerySet, ModelsNameMixin):
+    def for_customer(self, user):
+        queryset = self.filter(models.Q(author=user))
+        return queryset
+        
+    def for_performer(self, user):
+        queryset = self.filter(models.Q(performers=user))
+        return queryset
 
 
-class Task(models.Model):
+ 
+class Task(models.Model, ModelsNameMixin):
     title = models.CharField(verbose_name='Наименование', max_length=150)
     date = models.DateTimeField(verbose_name='Дата', auto_now_add=True)
     description = models.TextField(verbose_name='Описание', max_length=500)
@@ -54,6 +74,8 @@ class Task(models.Model):
     task_type = models.ForeignKey(TaskType, on_delete=models.PROTECT)
     author = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='user_task_auth')
     performers = models.ManyToManyField(User, related_name='user_task_performers')
+
+    objects = TaskQuerySet.as_manager()
 
     def __str__(self):      
         return "{{ {0} : {1} }}".format(self._meta.verbose_name, self.title)
@@ -64,7 +86,7 @@ class Task(models.Model):
         verbose_name_plural = 'Задачи'
 
 
-class Comment(models.Model):    
+class Comment(models.Model, ModelsNameMixin):    
     date = models.DateTimeField(verbose_name="Дата", auto_now=True)
     description = models.TextField(verbose_name="Содержание", max_length=500)
     task = models.ForeignKey(Task, on_delete=models.PROTECT)
