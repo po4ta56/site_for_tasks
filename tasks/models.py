@@ -16,7 +16,7 @@ class ModelsNameMixin:
 
 class Profile(models.Model):   
     user = models.OneToOneField(User, on_delete=models.CASCADE)
-    customer = models.BooleanField(verbose_name='Заказчик', default=False)
+    customer = models.BooleanField(verbose_name='Заказчик', default=True)
 
     class Meta:
         verbose_name = 'Профиль пользователя'
@@ -72,7 +72,7 @@ class Task(models.Model, ModelsNameMixin):
     description = models.TextField(verbose_name='Описание', max_length=500)
     state = models.ForeignKey(TaskState, on_delete=models.PROTECT)
     task_type = models.ForeignKey(TaskType, on_delete=models.PROTECT)
-    author = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='user_task_auth')
+    author = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='user_task_auth', blank=True, null=True)
     performers = models.ManyToManyField(User, related_name='user_task_performers')
 
     objects = TaskQuerySet.as_manager()

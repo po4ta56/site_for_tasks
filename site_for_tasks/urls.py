@@ -16,11 +16,15 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 from django.contrib.auth.views import LoginView, LogoutView, PasswordResetView
+from tasks.views import ProfileUpdateView, RouteLogedUserView, CreateUserView
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('login/', LoginView.as_view(), name='login'),
     path('logout/', LogoutView.as_view(), name='logout'),
+    path('accounts/profile/', ProfileUpdateView.as_view(), name='profile'),
     path('passreset/', PasswordResetView.as_view(), name='pass_reset'),
+    path('registration/', CreateUserView.as_view(), name='registration'),
+    path('route/', RouteLogedUserView, name="route"),
     path('tasks/', include('tasks.urls'))
 ]
