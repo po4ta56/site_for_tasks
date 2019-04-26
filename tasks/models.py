@@ -65,12 +65,12 @@ class TaskQuerySet(models.QuerySet, ModelsNameMixin):
         return queryset
 
 
- 
+DEFAULT_STATE_ID = 1
 class Task(models.Model, ModelsNameMixin):
     title = models.CharField(verbose_name='Наименование', max_length=150)
     date = models.DateTimeField(verbose_name='Дата', auto_now_add=True)
     description = models.TextField(verbose_name='Описание', max_length=500)
-    state = models.ForeignKey(TaskState, on_delete=models.PROTECT)
+    state = models.ForeignKey(TaskState, on_delete=models.PROTECT, default=DEFAULT_STATE_ID)
     task_type = models.ForeignKey(TaskType, on_delete=models.PROTECT)
     author = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='user_task_auth', blank=True, null=True)
     performers = models.ManyToManyField(User, related_name='user_task_performers')

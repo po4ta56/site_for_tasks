@@ -14,3 +14,5 @@ class TaskStateChangeForm(forms.Form):
 
 class CommentAddForm(forms.Form):
     description = forms.CharField(max_length=500)
+    #author = forms.
+
