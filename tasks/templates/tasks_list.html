@@ -10,7 +10,11 @@
     <h1>{{ view.model.get_model_name_plural }}</h1>
     <ul>
         {% for task in object_list %}
-            <li>{{ task.date }} - {{ task.title }} - {{task.task_type}} - {{task.task_state}}</li>
+            <li>
+                <a href="{{task.get_url}}"> 
+                    {{ task.date }} - {{ task.title }} - {{task.task_type}} - {{task.task_state}} - {{task.task_author}}
+                </a>
+            </li>
         {% empty %}
             <li>No tasks yet.</li>
         {% endfor %}

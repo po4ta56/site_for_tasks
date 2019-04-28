@@ -1,4 +1,4 @@
-from django.shortcuts import render, redirect, HttpResponse
+from django.shortcuts import render, redirect, HttpResponse, get_object_or_404
 from django.views.generic import DetailView, ListView, CreateView, UpdateView, DeleteView
 from django.contrib.auth.models import User
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -57,7 +57,36 @@ class TaskDelete(LoginRequiredMixin, DeleteView):
 
 class TaskDetailView(LoginRequiredMixin, DetailView):
     model = Task
-    template_name = "task_detail.html"
+    template_name = "tasks_detail.html"
+
+
+
+class TasksPerformerView(LoginRequiredMixin, ListView):  
+    model = Task
+    template_name = 'tasks_list.html'
+    redirect_field_name = 'redirect_to'
+
+    def get_queryset(self):
+        return Task.objects.all().for_performer(self.request.user)
+
+
+
+class TasksFreeView(LoginRequiredMixin, ListView):  
+    model = Task
+    template_name = 'tasks_list.html'
+    redirect_field_name = 'redirect_to'
+
+    def get_queryset(self):
+        return Task.objects.all().for_free(self.request.user)
+
+
+@login_required
+def TaskAccepted(request, task_id):
+    task = get_object_or_404(Task, id=task_id)
+    if task.performer_set.all().count()==0:
+        task.performer_set.add(request.user)
+        task.save()
+    redirect(task.get_absolute_url())
 
 
 
@@ -149,3 +178,26 @@ class CreateUserView(CreateView):
 
     def get_form_class(self):
         return UserCreationForm
+
+
+@login_required
+def CommentAdd(request, task_id):
+    form = CommentAddForm(request.POST)
+    task = get_object_or_404(Task, id=task_id)
+
+    if form.is_valid():
+        comment = Comment()
+        comment.task = task
+        comment.author = request.user
+        comment.description = form.cleaned_data['description']
+        comment.save()
+
+    return redirect(task.get_url())
+
+
+class _CommentAdd(CreateView):
+    model = Comment
+    
+    def get_queryset(self):
+        task_id = self.kwargs['task_id']
+        return Comment.objects.filter(task=task_id)

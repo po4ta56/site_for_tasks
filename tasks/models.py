@@ -3,6 +3,7 @@ from django.contrib.auth.models import User
 from django.dispatch import receiver
 from django.db.models.signals import post_save
 from django.conf import settings
+from django.urls import reverse_lazy
 
 
 class ModelsNameMixin:
@@ -37,7 +38,8 @@ class TaskState(models.Model, ModelsNameMixin):
     title = models.CharField(verbose_name='Наименование', max_length=100, unique=True)
 
     def __str__(self):      
-        return "{{ {0} : {1} }}".format(self._meta.verbose_name, self.title)
+        #return "{{ {0} : {1} }}".format(self._meta.verbose_name, self.title)
+        return self.title
 
     class Meta:
         verbose_name = 'Статус задачи'
@@ -48,7 +50,8 @@ class TaskType(models.Model, ModelsNameMixin):
     title = models.CharField(verbose_name='Наименование', max_length=100, unique=True)
     
     def __str__(self):      
-        return "{{ {0} : {1} }}".format(self._meta.verbose_name, self.title)
+        #return "{{ {0} : {1} }}".format(self._meta.verbose_name, self.title)
+        return self.title
     
     class Meta:
         verbose_name = 'Тип задачи'
@@ -64,6 +67,10 @@ class TaskQuerySet(models.QuerySet, ModelsNameMixin):
         queryset = self.filter(models.Q(performers=user))
         return queryset
 
+    def for_free(self):
+        queryset = self.filter(models.Q(performers=[]))
+        return queryset
+
 
 DEFAULT_STATE_ID = 1
 class Task(models.Model, ModelsNameMixin):
@@ -76,6 +83,10 @@ class Task(models.Model, ModelsNameMixin):
     performers = models.ManyToManyField(User, related_name='user_task_performers')
 
     objects = TaskQuerySet.as_manager()
+
+    def get_url(self):
+        return  reverse_lazy('task_list')+str(self.pk)+'/'
+
 
     def __str__(self):      
         return "{{ {0} : {1} }}".format(self._meta.verbose_name, self.title)

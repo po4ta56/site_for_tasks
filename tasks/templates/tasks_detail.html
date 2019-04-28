@@ -8,9 +8,20 @@
 {% block content %}
 
     <h1>{{ object.title }}  {{ object.date }}</h1>
+
+    <h5>Описание:</h5>
+    <p>{{ object.description }}</p>
     
-    <p>{{ object.task_type }}</p>
-    <p>{{ object.state }}</p>
+    <p>Тип: {{ object.task_type }}</p>
+    <p>Статус: {{ object.state }}</p>
+    <p>Автор: {{ object.author }}</p>
+    <p>Исполнители: 
+        <ul>
+            {% for performer in object.performers.all %}
+            <li>performer</li>
+            {% endfor %}
+        </ul>
+    </p>
 
     <ul>
         {% for comment in object.comment_set.all %}
@@ -20,7 +31,7 @@
             </li>
         {% endfor %}
     </ul>
-
+    <a href="{{request.path}}comment/add/">Добавить комментарий</a>
     </div>
 
 {% endblock %}
