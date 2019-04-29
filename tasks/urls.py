@@ -16,9 +16,14 @@ urlpatterns = [
     path('states/<pk>/delete/', TaskStateDelete.as_view(), name='task_states_delete'),
 
     path('', TasksView.as_view(), name='task_list'),
+    path('accepted/', TasksAcceptedView.as_view(), name='task_accepted'),
     path('add/', TaskCreate.as_view(), name='task_add'),
+    path('free/', TasksFreeView.as_view(), name='task_free'),
     path('<pk>/', TaskDetailView.as_view(), name='task_detail'),
     path('<pk>/delete/', TaskDelete.as_view(), name='task_delete'),
     path('<pk>/update/', TaskUpdate.as_view(), name='task_update'),
+    path('<pk>/accept/', TaskAccept, name='task_accept'),
+    path('<pk>/setstate/', TaskSetState.as_view(), name='task_set_state'),
     path('<task_id>/comment/add/', CommentCreateView.as_view(), name='task_detail'),
+    path('performer/', TaskPerformerInterface, name='performer'),
 ]

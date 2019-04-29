@@ -18,12 +18,27 @@
     <p>Исполнители: 
         <ul>
             {% for performer in object.performers.all %}
-            <li>performer</li>
+            <li>{{ performer }}</li>
             {% empty %}
                 <p>Исполнители не назначены.</p>
             {% endfor %}
         </ul>
     </p>
+
+    {% if object.author == user %}
+        <a href="{% url 'task_update' object.pk %}">Редактировать</a>
+        <br>
+        {% if not object.performers.count %}
+            <a href="{% url 'task_delete' object.pk %}">Удалить</a>
+            <br>
+        {% endif %}
+    {% endif %}
+
+    {% if user.profile.customer is False  and  not object.performers.count %}
+        <a href="{% url 'task_accept' object.pk %}">Принять</a>
+    {% endif %}
+
+    <a href="{% url 'task_set_state' object.pk %}">Установить статус</a>
 
     <p>Комментарии:
         <ul>
@@ -38,6 +53,6 @@
         </ul>
     </p>
     <a href="{{request.path}}comment/add/">Добавить комментарий</a>
-    </div>
+    
 
 {% endblock %}

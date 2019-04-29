@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+
+{% block title %}
+    {{ view.model.get_model_name_plural }}
+{% endblock %}
+      
+
+{% block content %}
+
+    <h1>Интерфейс исолнителя</h1>
+    <ul>
+        <li><a href="{% url 'task_free' %}">Свободные задачи</a></li>    
+        <li><a href="{% url 'task_accepted' %}">Принятые задачи</a></li>
+    </ul>
+    
+
+{% endblock %}

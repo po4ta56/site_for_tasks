@@ -68,7 +68,7 @@ class TaskQuerySet(models.QuerySet, ModelsNameMixin):
         return queryset
 
     def for_free(self):
-        queryset = self.filter(models.Q(performers=[]))
+        queryset = self.filter(models.Q(performers=None))
         return queryset
 
 

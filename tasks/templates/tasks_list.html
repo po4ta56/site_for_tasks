@@ -19,7 +19,9 @@
             <li>Нет созданных задач.</li>
         {% endfor %}
     </ul>
-    <a href="{{ request.path }}add/">Добавить</a>
-    </div>
+    {% if user.profile.customer %}
+        <a href="{{ request.path }}add/">Добавить</a>
+    {% endif %}
+    
 
 {% endblock %}

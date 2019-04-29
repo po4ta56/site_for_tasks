@@ -48,6 +48,13 @@ class TaskUpdate(LoginRequiredMixin, UpdateView):
         return HttpResponse(status=404)
 
 
+class TaskSetState(LoginRequiredMixin, UpdateView):
+    model = Task
+    fields = ['state']
+    template_name = 'simple_obj/simple_obj_update_form.html'
+    success_url = reverse_lazy('task_list')
+
+
 
 class TaskDelete(LoginRequiredMixin, DeleteView):
     model = Task
@@ -61,7 +68,7 @@ class TaskDetailView(LoginRequiredMixin, DetailView):
 
 
 
-class TasksPerformerView(LoginRequiredMixin, ListView):  
+class TasksAcceptedView(LoginRequiredMixin, ListView):  
     model = Task
     template_name = 'tasks_list.html'
     redirect_field_name = 'redirect_to'
@@ -77,17 +84,21 @@ class TasksFreeView(LoginRequiredMixin, ListView):
     redirect_field_name = 'redirect_to'
 
     def get_queryset(self):
-        return Task.objects.all().for_free(self.request.user)
+        return Task.objects.all().for_free()
 
 
 @login_required
-def TaskAccepted(request, task_id):
-    task = get_object_or_404(Task, id=task_id)
-    if task.performer_set.all().count()==0:
-        task.performer_set.add(request.user)
+def TaskAccept(request, pk):
+    task = get_object_or_404(Task, id=pk)
+    if task.performers.all().count()==0:
+        task.performers.add(request.user)
         task.save()
-    redirect(task.get_absolute_url())
+    return redirect(task.get_url())
 
+
+@login_required
+def TaskPerformerInterface(request):
+    return render(request, 'tasks_performer_interface.html')
 
 
 class TaskTypesView(LoginRequiredMixin, ListView):
@@ -149,9 +160,6 @@ class TaskStateDelete(LoginRequiredMixin, DeleteView):
 
 
 
-
-
-
 class ProfileUpdateView(LoginRequiredMixin, UpdateView):
     model = User
     fields = ['firstname', 'lastname', 'profile__customer']
@@ -166,7 +174,7 @@ def RouteLogedUserView(request):
         if user.profile.customer:
             return redirect('task_list')
         else:
-            return redirect('task_list')
+            return redirect('performer')
     return redirect('login')
 
 
@@ -179,7 +187,7 @@ class CreateUserView(CreateView):
     def get_form_class(self):
         return UserCreationForm
 
-
+'''
 @login_required
 def CommentAdd(request, task_id):
     form = CommentAddForm(request.POST)
@@ -193,7 +201,7 @@ def CommentAdd(request, task_id):
         comment.save()
 
     return redirect(task.get_url())
-
+'''
 
 class CommentCreateView(LoginRequiredMixin, CreateView):
     model = Comment
