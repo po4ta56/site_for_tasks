@@ -195,9 +195,18 @@ def CommentAdd(request, task_id):
     return redirect(task.get_url())
 
 
-class _CommentAdd(CreateView):
+class CommentCreateView(LoginRequiredMixin, CreateView):
     model = Comment
-    
-    def get_queryset(self):
-        task_id = self.kwargs['task_id']
-        return Comment.objects.filter(task=task_id)
+    fields = ['description']
+    template_name = 'simple_obj/simple_obj_create_form.html'
+
+    def form_valid(self, form):
+        form.instance.author = self.request.user
+        tasksSet = get_object_or_404(Task, id=self.kwargs['task_id'])
+        if len(tasksSet):
+            form.instance.task = tasksSet[0]
+            self.success_url = form.instance.task.get_url()
+        return super().form_valid(form)
+
+
+

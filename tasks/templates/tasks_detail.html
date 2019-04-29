@@ -19,18 +19,24 @@
         <ul>
             {% for performer in object.performers.all %}
             <li>performer</li>
+            {% empty %}
+                <p>Исполнители не назначены.</p>
             {% endfor %}
         </ul>
     </p>
 
-    <ul>
-        {% for comment in object.comment_set.all %}
-            <li>
-                <p>{{ comment.date }} {{ comment.author }}</p>
-                <p>{{ comment.description}}</p>
-            </li>
-        {% endfor %}
-    </ul>
+    <p>Комментарии:
+        <ul>
+            {% for comment in object.comment_set.all %}
+                <li>
+                    <p>{{ comment.date }} {{ comment.author }}</p>
+                    <p>{{ comment.description}}</p>
+                </li>
+            {% empty %}
+                <p>Комментариев пока что нет.</p>
+            {% endfor %}
+        </ul>
+    </p>
     <a href="{{request.path}}comment/add/">Добавить комментарий</a>
     </div>
 
