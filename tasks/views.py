@@ -5,6 +5,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import UserCreationForm
 from django.urls import reverse_lazy
+from django.db import transaction
 from .models import *
 from .forms import *
 
@@ -88,6 +89,7 @@ class TasksFreeView(LoginRequiredMixin, ListView):
 
 
 @login_required
+@transaction.atomic
 def TaskAccept(request, pk):
     task = get_object_or_404(Task, id=pk)
     if task.performers.all().count()==0:
