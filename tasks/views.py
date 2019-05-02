@@ -9,17 +9,14 @@ from django.db import transaction
 from .models import *
 from .forms import *
 
-
-
-class TasksView(LoginRequiredMixin, ListView):  
-    model = Task
-    template_name = 'tasks_list.html'
-    redirect_field_name = 'redirect_to'
-
+class FilterMixin:
+    filter_form_class = None
+    filter_form = None
+    
     def dispatch(self, request, *args, **kwargs):
-        self.filter_form = TaskFilterForm(request.GET)
-        self.filter_form.is_valid()
-                    
+        if self.filter_form_class:
+            self.filter_form = self.filter_form_class(request.GET)
+            self.filter_form.is_valid()
         return super().dispatch(request, *args, **kwargs)
 
     def get_context_data(self, **kwargs):
@@ -27,18 +24,33 @@ class TasksView(LoginRequiredMixin, ListView):
         context['filter_form'] = self.filter_form
         return context
 
+    def add_filter(self, queryset, fields):
+        for field in fields:
+            if self.filter_form.cleaned_data[field]:
+                queryset = eval('queryset.filter('+field+'=self.filter_form.cleaned_data[field])')
+        return queryset
+
+
+
+class TasksView(FilterMixin, LoginRequiredMixin, ListView):  
+    model = Task
+    template_name = 'tasks_list.html'
+    redirect_field_name = 'redirect_to'
+    filter_form_class = TaskFilterForm
+
+    def dispatch(self, request, *args, **kwargs):
+        return super().dispatch(request, *args, **kwargs)
+
+    def get_context_data(self, **kwargs):
+        return super().get_context_data(**kwargs)       
+
     def get_queryset(self):
         queryset = Task.objects.all().for_customer(self.request.user)
-
-        if self.filter_form.cleaned_data['task_type']:
-            queryset = Task.objects.all(). \
-                for_customer(self.request.user). \
-                filter(task_type=self.filter_form.cleaned_data['task_type']) 
+        queryset = self.add_filter(queryset, ['task_type'])     
 
         queryset = queryset.select_related(
             'task_type', 'state', 'author'
         )
-
         return queryset
 
 
@@ -91,23 +103,42 @@ class TaskDetailView(LoginRequiredMixin, DetailView):
 
 
 
-class TasksAcceptedView(LoginRequiredMixin, ListView):  
+class TasksAcceptedView(FilterMixin, LoginRequiredMixin, ListView):  
     model = Task
     template_name = 'tasks_list.html'
     redirect_field_name = 'redirect_to'
+    filter_form_class = TaskFilterForm
+
+    def get_context_data(self, **kwargs):
+        return super().get_context_data(**kwargs)    
 
     def get_queryset(self):
-        return Task.objects.all().for_performer(self.request.user)
+        queryset = Task.objects.all().for_performer(self.request.user)
+        queryset = self.add_filter(queryset, ['task_type'])     
+        queryset = queryset.select_related(
+            'task_type', 'state', 'author'
+        )
+        return queryset
 
 
 
-class TasksFreeView(LoginRequiredMixin, ListView):  
+class TasksFreeView(FilterMixin, LoginRequiredMixin, ListView):  
     model = Task
     template_name = 'tasks_list.html'
     redirect_field_name = 'redirect_to'
+    filter_form_class = TaskFilterForm
+
+    def get_context_data(self, **kwargs):
+        return super().get_context_data(**kwargs)    
 
     def get_queryset(self):
-        return Task.objects.all().for_free()
+        queryset = Task.objects.all().for_free()
+        queryset = self.add_filter(queryset, ['task_type'])     
+
+        queryset = queryset.select_related(
+            'task_type', 'state', 'author'
+        )
+        return queryset
 
 
 @login_required
