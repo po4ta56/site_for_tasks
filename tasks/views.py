@@ -28,12 +28,12 @@ class TasksView(LoginRequiredMixin, ListView):
         return context
 
     def get_queryset(self):
+        queryset = Task.objects.all().for_customer(self.request.user)
+
         if self.filter_form.cleaned_data['task_type']:
             queryset = Task.objects.all(). \
                 for_customer(self.request.user). \
-                filter(task_type=self.filter_form.cleaned_data['task_type'])
-        else:
-            queryset = Task.objects.all().for_customer(self.request.user)
+                filter(task_type=self.filter_form.cleaned_data['task_type']) 
 
         queryset = queryset.select_related(
             'task_type', 'state', 'author'
