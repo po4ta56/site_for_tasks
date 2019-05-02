@@ -1,6 +1,7 @@
 from django import forms
 from .models import TaskType, TaskState
 
+'''
 class TaskEditForm(forms.Form):
     title = forms.CharField(required=True, max_length=150)
     description = forms.CharField(max_length=500)
@@ -15,4 +16,7 @@ class TaskStateChangeForm(forms.Form):
 class CommentAddForm(forms.Form):
     description = forms.CharField(max_length=500)
     #author = forms.
+'''
 
+class TaskFilterForm(forms.Form):
+    task_type = forms.ModelChoiceField(queryset=TaskType.objects.all(), required=False)

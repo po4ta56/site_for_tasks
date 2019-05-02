@@ -20,11 +20,11 @@ from django.contrib.auth.views import LoginView, LogoutView, PasswordResetView
 from tasks.views import ProfileUpdateView, RouteLogedUserView, CreateUserView
 
 urlpatterns = [
-    path('/', RedirectView.as_view(pattern_name='task_list', permanent=False)),
+    path('', RedirectView.as_view(pattern_name='route', permanent=False)),
     path('admin/', admin.site.urls),
     path('login/', LoginView.as_view(), name='login'),
     path('logout/', LogoutView.as_view(), name='logout'),
-    path('accounts/profile/<pk>/', ProfileUpdateView.as_view(), name='profile'),
+    path('profile/<pk>/', ProfileUpdateView.as_view(), name='profile'),
     path('passreset/', PasswordResetView.as_view(), name='pass_reset'),
     path('registration/', CreateUserView.as_view(), name='registration'),
     path('route/', RouteLogedUserView, name="route"),

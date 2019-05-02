@@ -16,8 +16,30 @@ class TasksView(LoginRequiredMixin, ListView):
     template_name = 'tasks_list.html'
     redirect_field_name = 'redirect_to'
 
+    def dispatch(self, request, *args, **kwargs):
+        self.filter_form = TaskFilterForm(request.GET)
+        self.filter_form.is_valid()
+                    
+        return super().dispatch(request, *args, **kwargs)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['filter_form'] = self.filter_form
+        return context
+
     def get_queryset(self):
-        return Task.objects.all().for_customer(self.request.user)
+        if self.filter_form.cleaned_data['task_type']:
+            queryset = Task.objects.all(). \
+                for_customer(self.request.user). \
+                filter(task_type=self.filter_form.cleaned_data['task_type'])
+        else:
+            queryset = Task.objects.all().for_customer(self.request.user)
+
+        queryset = queryset.select_related(
+            'task_type', 'state', 'author'
+        )
+
+        return queryset
 
 
 
@@ -95,10 +117,12 @@ def TaskAccept(request, pk):
     if task.performers.all().count()==0:
         task.performers.add(request.user)
         task.save()
-    return redirect(task.get_url())
+        return HttpResponse('Задача принята вами!')
+    return HttpResponse('Неудача!')
+    #return redirect(task.get_url())
 
 
-@login_required
+
 def TaskPerformerInterface(request):
     return render(request, 'tasks_performer_interface.html')
 
@@ -163,10 +187,11 @@ class TaskStateDelete(LoginRequiredMixin, DeleteView):
 
 
 class ProfileUpdateView(LoginRequiredMixin, UpdateView):
-    model = User
-    fields = ['firstname', 'lastname', 'profile__customer']
+    model = Profile
+    fields = ['customer']
     template_name = 'simple_obj/simple_obj_update_form.html'
     success_url = reverse_lazy('route')
+
 
 
 @login_required
@@ -184,26 +209,14 @@ class CreateUserView(CreateView):
     models = User
     fields = ['firstname', 'lastname', 'email', 'login', 'password']
     template_name = 'simple_obj/simple_obj_create_form.html'
-    success_url = reverse_lazy('profile')
-
+    
     def get_form_class(self):
         return UserCreationForm
 
-'''
-@login_required
-def CommentAdd(request, task_id):
-    form = CommentAddForm(request.POST)
-    task = get_object_or_404(Task, id=task_id)
+    def get_success_url(self):
+        return reverse_lazy('profile', args=[self.object.pk])
+        
 
-    if form.is_valid():
-        comment = Comment()
-        comment.task = task
-        comment.author = request.user
-        comment.description = form.cleaned_data['description']
-        comment.save()
-
-    return redirect(task.get_url())
-'''
 
 class CommentCreateView(LoginRequiredMixin, CreateView):
     model = Comment
@@ -213,8 +226,8 @@ class CommentCreateView(LoginRequiredMixin, CreateView):
     def form_valid(self, form):
         form.instance.author = self.request.user
         tasksSet = get_object_or_404(Task, id=self.kwargs['task_id'])
-        if len(tasksSet):
-            form.instance.task = tasksSet[0]
+        if tasksSet:
+            form.instance.task = tasksSet
             self.success_url = form.instance.task.get_url()
         return super().form_valid(form)
 
